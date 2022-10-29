@@ -88,7 +88,8 @@ def plot_counts(
 def plot_disc_meth(dataframe, merge_low=None, 
 title='Discovery methods'):
 
-    from column_names import disc_meth
+    #from column_names import disc_meth
+    from utils.column_names import disc_meth
     
     lab_list = [] # List of labels
     lab_list_low = [] # List of merged labels

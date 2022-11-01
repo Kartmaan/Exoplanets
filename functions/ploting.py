@@ -37,33 +37,94 @@ def to_img(fig, frmt='png', output='img'):
 
 def plot_counts(
     series, x_label='x', y_label='y', title='', 
-    frm=0, to=None, output='img'):
+    frm=0, to=None, kind='bar', merge_low=None, 
+    output='img'):
     """ The function allows to make a graphical representation 
     of a Pandas Series, particularly suitable for 
-    values_counts()
+    values_counts().
 
-    x_label : x axis name
-    y_label : y axis name
-    title : plot title
-    frm : index start
-    to : index end
-    output : 'fig', 'img', 'bytes'
+    - series : a Pandas series
+    - x_label : plot x axis name
+    - y_label : plot y axis name
+    - title : plot title
+    - frm : series index start
+    - to : series index end
+    - kind : plot kind -> 'bar' or 'pie'
+    - merge_low : Merging from a given value (default : None)
+    - output : 'fig' (plotly object), 'img' (image), 
+    'bytes' (image in bytes)
     """
 
+    # -------------- SECURITY CHECK --------------
+    if not isinstance(series, pd.core.series.Series):
+        raise TypeError('Not a Pandas Series')
+
+    # -------------- SERIES CROP TRUE --------------
     if frm != 0 or to != None:
         series = series[frm:to]
 
+    # Axis creation
     x = series.index
     y = series.values
 
-    fig = px.bar(
-    x=x, 
-    y=y, 
-    title=title,
-    labels={'x': x_label, 'y': y_label},
-    text_auto='.2s'
-    )
+    # -------------- MERGING TRUE --------------
+    if merge_low != None:
+        x = []
+        x_low = []
 
+        y = []
+        y_low = []
+        
+        for item in series.iteritems():
+            if item[1] == 0:
+                continue
+
+            elif item[1] > merge_low:
+                x.append(item[0])
+                y.append(item[1])
+
+            else:
+                x_low.append(item[0])
+                y_low.append(item[1])
+            
+        y.append(sum(y_low))
+        x.append(f'Others ({len(x_low)})')
+
+        if kind == 'bar':
+            """ Convert all x_axis into string so that
+            'others' label can be correctly display 
+            in bar mode """ 
+            
+            for idx, val in enumerate(x):
+                x[idx] = str(x[idx])
+
+    # -------------- PLOT BAR --------------
+    if kind == 'bar':
+        fig = px.bar(
+        x=x, 
+        y=y, 
+        title=title,
+        labels={'x': x_label, 'y': y_label},
+        text_auto='.2s'
+        )
+        
+    # -------------- PIE CHART --------------
+    elif kind == 'pie':
+        fig = go.Figure(data=[go.Pie(
+            labels=x, 
+            values=y,
+            hole=.5
+            )])
+        
+        fig.update_layout(
+            title_text = f'{title}'
+        )
+    
+    # -------------- WRONG KIND --------------
+    else:
+        raise NameError("Parameter 'kind' not recognized, please check the docstring")
+
+    # -------------- OUTPUT --------------
     if output == 'fig':
         return fig # pyplot object
 
@@ -81,7 +142,7 @@ def plot_counts(
             return to_img(fig, output='bytes') # Image bytes
     
     else:
-        raise TypeError('Wrong output parameter, please check the docstring')
+        raise NameError('Wrong output parameter, please check the docstring')
 
 # -----------------------------------------------
 

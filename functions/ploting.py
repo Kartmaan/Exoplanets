@@ -88,7 +88,6 @@ def plot_counts(
 def plot_disc_meth(dataframe, merge_low=None, 
 title='Discovery methods', duo=None):
 
-    #from column_names import disc_meth
     from utils.column_names import disc_meth
     
     if duo == None:

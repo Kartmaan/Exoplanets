@@ -46,21 +46,40 @@ def plot_split(series, title='', x_label='x', y_label='y',
 
     # -------------- SERIES CHECK --------------
     if not isinstance(series, pd.core.series.Series):
-        raise TypeError(
-            "'series' parameter must be a Pandas Series")
+        raise TypeError("'series' must be a Pandas Series, "+
+        f"{type(series)} inserted")
     
     # -------------- BAR COLOR CHECK --------------
     if isinstance(bar_color, tuple):
-        bar_color = f"rgb{str(bar_color)}"
+        if len(bar_color) != 3:
+            raise ValueError('Tuple must contain 3 RGB values,'+
+            f' {len(bar_color)} inserted')
+
+        boo = []
+        for val in bar_color:
+            if isinstance(val, int) and 0 <= val <= 255:
+                boo.append(True)
+            else:
+                boo.append(False)
+        
+        if all(boo):
+            bar_color = f"rgb{str(bar_color)}" # OK
+        else:
+            raise ValueError('Wrong RGB format')
     
     elif isinstance(bar_color, str) and bar_color[0] == '@':
         if bar_color in palette:
-            bar_color = palette[bar_color]
+            bar_color = palette[bar_color] # OK
         else:
             raise NameError("Color not found in palette")
+    
+    else:
+        pass
 
+    # -------------- DROP NAN VALUES --------------
     series = series.dropna()
 
+    # -------------- SPLITTING --------------
     if splits == None:
         splits = np.array([
             [0, 5], 
@@ -88,6 +107,7 @@ def plot_split(series, title='', x_label='x', y_label='y',
 
         splits_dict[f'+{splits[-1][1]}'] = [part, len(part)]        
     
+    # -------------- PLOTING --------------
     x = []
     y = []
 

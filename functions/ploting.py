@@ -8,6 +8,8 @@ import plotly.graph_objects as go
 import plotly.io as pio
 from IPython.display import Image # Convert bytes to image
 
+from utils.colors import palette
+
 # -----------------------------------------------
 
 def to_img(fig, frmt='png', output='img'):
@@ -39,11 +41,23 @@ def to_img(fig, frmt='png', output='img'):
 # -----------------------------------------------
 
 def plot_split(series, title='', x_label='x', y_label='y', 
-    splits=None, show_sup=False, kind='bar'):
+    splits=None, show_sup=False, kind='bar', grid=False,
+    bar_color='rgb(99,110,250)'):
 
+    # -------------- SERIES CHECK --------------
     if not isinstance(series, pd.core.series.Series):
         raise TypeError(
             "'series' parameter must be a Pandas Series")
+    
+    # -------------- BAR COLOR CHECK --------------
+    if isinstance(bar_color, tuple):
+        bar_color = f"rgb{str(bar_color)}"
+    
+    elif isinstance(bar_color, str) and bar_color[0] == '@':
+        if bar_color in palette:
+            bar_color = palette[bar_color]
+        else:
+            raise NameError("Color not found in palette")
 
     series = series.dropna()
 
@@ -87,9 +101,17 @@ def plot_split(series, title='', x_label='x', y_label='y',
             y=y,
             title=title,
             labels={'x': x_label, 'y': y_label},
-            text_auto='.3'
+            text_auto='.5'
             )
     
+        fig.update_traces(
+            marker_color=bar_color
+            )
+        
+        if grid:
+            fig.update_yaxes(showgrid=True, gridcolor='black',
+            gridwidth=0.5)
+
     elif kind == 'pie':
         fig = go.Figure(data=[go.Pie(
             labels=x, 

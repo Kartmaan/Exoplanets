@@ -1,11 +1,14 @@
 # PLOT FUNCTIONS
 
 import pandas as pd
+import numpy as np
 
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
 from IPython.display import Image # Convert bytes to image
+
+# -----------------------------------------------
 
 def to_img(fig, frmt='png', output='img'):
         """ Function to convert a Pyplot figure 
@@ -32,6 +35,61 @@ def to_img(fig, frmt='png', output='img'):
                 raise NameError(
                         'Wrong parameter, please check docstring'
                         )
+
+# -----------------------------------------------
+
+def plot_split(series, title='', x_label='x', y_label='y', 
+    splits=None, show_sup=False):
+
+    if not isinstance(series, pd.core.series.Series):
+        raise TypeError(
+            "'series' parameter must be a Pandas Series")
+
+    series = series.dropna()
+
+    if splits == None:
+        splits = np.array([
+            [0, 5], 
+            [5, 10],
+            [10, 50],
+            [50, 100],
+            [100, 500],
+            [500, 1000],
+            [1000, 5000],
+            [5000, 10000]])
+    else:
+        splits = np.array(splits)
+
+    splits_dict = {}
+
+    for splt in splits:
+        part = series.loc[lambda x : (x > splt[0]) & (x <= splt[1])]
+        part = np.array(part.values)
+        
+        splits_dict[f'{splt[0]}-{splt[1]}'] = [part, len(part)]
+    
+    if show_sup:
+        part = series.loc[lambda x : x > splits[-1][1]]
+        part = np.array(part.values)
+
+        splits_dict[f'+{splits[-1][1]}'] = [part, len(part)]        
+    
+    x = []
+    y = []
+
+    for key, val in splits_dict.items():
+        x.append(key)
+        y.append(val[1])
+    
+    fig = px.bar(
+        x=x, 
+        y=y,
+        title=title,
+        labels={'x': x_label, 'y': y_label},
+        text_auto='.3'
+        )
+    
+    return to_img(fig)
 
 # -----------------------------------------------
 

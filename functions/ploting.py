@@ -220,7 +220,7 @@ def plot_counts(
 # -----------------------------------------------
 
 def plot_disc_meth(dataframe, merge_low=None, 
-title='Discovery methods', duo=None):
+    title='Discovery methods', duo=None):
 
     from utils.column_names import disc_meth
     

@@ -39,7 +39,7 @@ def to_img(fig, frmt='png', output='img'):
 # -----------------------------------------------
 
 def plot_split(series, title='', x_label='x', y_label='y', 
-    splits=None, show_sup=False):
+    splits=None, show_sup=False, kind='bar'):
 
     if not isinstance(series, pd.core.series.Series):
         raise TypeError(
@@ -81,14 +81,29 @@ def plot_split(series, title='', x_label='x', y_label='y',
         x.append(key)
         y.append(val[1])
     
-    fig = px.bar(
-        x=x, 
-        y=y,
-        title=title,
-        labels={'x': x_label, 'y': y_label},
-        text_auto='.3'
-        )
+    if kind == 'bar':
+        fig = px.bar(
+            x=x, 
+            y=y,
+            title=title,
+            labels={'x': x_label, 'y': y_label},
+            text_auto='.3'
+            )
     
+    elif kind == 'pie':
+        fig = go.Figure(data=[go.Pie(
+            labels=x, 
+            values=y,
+            hole=.5
+            )])
+        
+        fig.update_layout(
+            title_text = f'{title}')
+
+    else:
+        raise NameError(
+            'Wrong "kind" parameter, please check parameter')
+            
     return to_img(fig)
 
 # -----------------------------------------------

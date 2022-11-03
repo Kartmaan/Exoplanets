@@ -47,13 +47,13 @@ def plot_split(series, title='', x_label='x', y_label='y',
     # -------------- SERIES CHECK --------------
     if not isinstance(series, pd.core.series.Series):
         raise TypeError("'series' must be a Pandas Series, "+
-        f"{type(series)} inserted")
+        f"{type(series)} given")
     
     # -------------- BAR COLOR CHECK --------------
     if isinstance(bar_color, tuple):
         if len(bar_color) != 3:
             raise ValueError('Tuple must contain 3 RGB values,'+
-            f' {len(bar_color)} inserted')
+            f' {len(bar_color)} given')
 
         boo = []
         for val in bar_color:
@@ -65,7 +65,8 @@ def plot_split(series, title='', x_label='x', y_label='y',
         if all(boo):
             bar_color = f"rgb{str(bar_color)}" # OK
         else:
-            raise ValueError('Wrong RGB format')
+            raise ValueError('Wrong RGB format, must be '+
+            '3 values between 0 and 255')
     
     elif isinstance(bar_color, str) and bar_color[0] == '@':
         if bar_color in palette:

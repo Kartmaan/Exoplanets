@@ -49,8 +49,22 @@ def plot_split(series, title='', x_label='x', y_label='y',
         raise TypeError("'series' must be a Pandas Series, "+
         f"{type(series)} given")
     
+    else:
+        series = series.dropna()
+
+        for idx, val in enumerate(series.values):
+            if not isinstance(val, (int, float)):
+                raise ValueError('Series values must only '+
+                f'contain int or float, {type(val)} '+ 
+                f'given at index {idx}')
+            else:
+                continue
+    
     # -------------- BAR COLOR CHECK --------------
-    if isinstance(bar_color, tuple):
+    if not isinstance(bar_color, (tuple, str)):
+        raise TypeError('bar_color must be a tuple or str')
+    
+    elif isinstance(bar_color, tuple):
         if len(bar_color) != 3:
             raise ValueError('Tuple must contain 3 RGB values,'+
             f' {len(bar_color)} given')
@@ -77,10 +91,7 @@ def plot_split(series, title='', x_label='x', y_label='y',
     else:
         pass
 
-    # -------------- DROP NAN VALUES --------------
-    series = series.dropna()
-
-    # -------------- SPLITTING --------------
+    # -------------- SPLITTING PHASE 1 --------------
     if splits == None:
         splits = np.array([
             [0, 5], 
@@ -91,9 +102,43 @@ def plot_split(series, title='', x_label='x', y_label='y',
             [500, 1000],
             [1000, 5000],
             [5000, 10000]])
-    else:
-        splits = np.array(splits)
 
+    # -------------- SPLITS CHECK --------------
+    else:
+        # Not a list
+        if not isinstance(splits, list):
+            raise TypeError('splits must be a list, ' + 
+            f'{type(splits)} given')
+
+        for idx, val in enumerate(splits):
+            # One of the elements isn't a list
+            if not isinstance(val, list):
+                raise TypeError('splits must only contains lists '+
+                f'{type(splits[idx])} given at index {idx} \n'+
+                f'--> {splits[idx]}')
+
+            # One sublist doesn't have a length of 2
+            elif not len(val) == 2:
+                raise TypeError('A split must contain 2 values '+
+                f'{len(splits[idx])} given at index {idx} \n'+
+                f'--> {splits[idx]}')
+
+            # One sublist does not contain a valid number
+            elif not isinstance(val[0], (int, float)) or \
+                not isinstance(val[1], (int, float)):
+                raise ValueError('A split must contain 2 numbers, '+
+                f'int or float. --> {splits[idx]} at index {idx}')
+            
+            # The 2nd value isn't greater than the 1st
+            elif not val[0] < val[1]:
+                raise ValueError('The 2nd value of a split '+
+                'must be greater than the 1st \n'+
+                f'--> {splits[idx]} at index {idx}')
+            
+            else:
+                splits = np.array(splits)
+
+    # -------------- SPLITTING PHASE 2 --------------
     splits_dict = {}
 
     for splt in splits:

@@ -42,7 +42,7 @@ def to_img(fig, frmt='png', output='img'):
 
 def plot_split(series, title='', x_label='x', y_label='y', 
     splits=None, show_sup=False, kind='bar', grid=False,
-    bar_color='rgb(99,110,250)'):
+    bar_color='rgb(99,110,250)', output='img'):
 
     # -------------- SERIES CHECK --------------
     if not isinstance(series, pd.core.series.Series):
@@ -191,8 +191,16 @@ def plot_split(series, title='', x_label='x', y_label='y',
     else:
         raise NameError(
             'Wrong "kind" parameter, please check parameter')
-            
-    return to_img(fig)
+    
+    # -------------- OUTPUT --------------
+    if output == 'img':
+        return to_img(fig)
+
+    elif output =='fig':
+        return fig
+        
+    else:
+        raise NameError('Unrecognized "output" parameter')
 
 # -----------------------------------------------
 
